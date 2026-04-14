@@ -1,0 +1,770 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary);font-size:15px}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--color-background-tertiary)}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:17px;font-weight:500}
+.topbar .role-badge{font-size:11px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer}
+.nav{background:var(--color-background-primary);border-top:0.5px solid var(--color-border-tertiary);position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;justify-content:space-around;padding:8px 0 12px;z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:8px}
+.nav-btn.active{color:#178BCA}
+.nav-btn svg{width:22px;height:22px}
+.content{padding:12px 16px 90px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--color-background-primary);border-radius:12px;border:0.5px solid var(--color-border-tertiary);padding:14px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em}
+input,select,textarea{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:8px;font-size:14px;background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans)}
+textarea{resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#178BCA}
+.btn{padding:8px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:13px;cursor:pointer;font-family:var(--font-sans);transition:background 0.1s}
+.btn:hover{background:var(--color-background-tertiary)}
+.btn-primary{background:#178BCA;color:#fff;border-color:#178BCA}
+.btn-primary:hover{background:#1278B0}
+.btn-danger{background:var(--color-background-danger);color:var(--color-text-danger);border-color:var(--color-border-danger)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.time-slot{background:var(--color-background-secondary);border-radius:10px;padding:10px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary)}
+.time-slot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.time-slot-name{font-weight:500;font-size:14px}
+.vital-input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.vital-box{background:var(--color-background-secondary);border-radius:10px;padding:10px;border:0.5px solid var(--color-border-tertiary);text-align:center}
+.vital-box label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:4px}
+.vital-box input{text-align:center;border-radius:6px;padding:6px}
+.bristol-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.bristol-btn{width:40px;height:40px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:500;transition:all 0.15s}
+.bristol-btn.selected{background:#178BCA;color:#fff;border-color:#178BCA}
+.log-entry{border-left:2px solid var(--color-border-secondary);padding:6px 10px;margin-bottom:6px;font-size:13px}
+.log-entry .ts{font-size:11px;color:var(--color-text-secondary)}
+.log-entry.med-log{border-color:#178BCA}
+.log-entry.vital-log{border-color:#0F6E56}
+.log-entry.symptom-log{border-color:#993C1D}
+.tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;margin:2px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary)}
+.symptom-btn{padding:7px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:13px;cursor:pointer;transition:all 0.15s}
+.symptom-btn.active{background:#D85A30;color:#fff;border-color:#D85A30}
+.export-check{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px}
+.export-check:last-child{border-bottom:none}
+.export-check input[type=checkbox]{width:auto;cursor:pointer}
+.reminder-banner{background:var(--color-background-warning);border:0.5px solid var(--color-border-warning);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-text-warning)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;justify-content:center;z-index:200}
+.modal{background:var(--color-background-primary);border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:20px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.close-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--color-text-secondary);line-height:1}
+.dr-note-entry{background:var(--color-background-secondary);border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid #534AB7}
+.section-header{font-size:18px;font-weight:500;margin-bottom:12px}
+.empty-state{text-align:center;padding:32px 16px;color:var(--color-text-tertiary);font-size:14px}
+.switch-row{display:flex;gap:8px;margin-bottom:12px}
+.switch-btn{flex:1;padding:7px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:13px;cursor:pointer;text-align:center}
+.switch-btn.active{background:#178BCA;color:#fff;border-color:#178BCA}
+.photo-upload-area{border:1.5px dashed var(--color-border-secondary);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border-color 0.15s;position:relative;margin-top:4px}
+.photo-upload-area:hover{border-color:#178BCA}
+.photo-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-top:8px;border:0.5px solid var(--color-border-tertiary)}
+.photo-preview-wrap{position:relative;display:inline-block;margin-top:8px}
+.photo-remove-btn{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.log-pill-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.log-pill-row:last-child{border-bottom:none}
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <h1>Caregiver Assistant</h1>
+    <button class="role-badge" onclick="toggleRole()" id="role-btn">Patient</button>
+  </div>
+
+  <div class="content">
+    <div class="section active" id="sec-meds">
+      <div class="switch-row">
+        <div class="switch-btn active" onclick="setMedView('log',this)">Log meds</div>
+        <div class="switch-btn" onclick="setMedView('manage',this)">Manage</div>
+        <div class="switch-btn" onclick="setMedView('history',this)">History</div>
+      </div>
+      <div id="med-view-log"><div id="reminders-area"></div>
+	  <div id="time-slots-area"></div></div>
+      <div id="med-view-manage" style="display:none">
+        <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="openAddMedModal()">+ Add medication</button>
+        <div id="med-list-area"></div>
+      </div>
+      <div id="med-view-history" style="display:none">
+	  <div id="med-history-area"></div></div>
+    </div>
+
+    <div class="section" id="sec-vitals">
+      <p class="section-header">Log vitals</p>
+      <div class="card">
+        <div class="card-title">Blood pressure & pulse</div>
+        <div class="vital-input-row">
+          <div class="vital-box"><label>Systolic</label><input type="number" id="bp-sys" placeholder="120"></div>
+          <div class="vital-box"><label>Diastolic</label><input type="number" id="bp-dia" placeholder="80"></div>
+        </div>
+        <div class="vital-input-row">
+          <div class="vital-box"><label>Pulse (bpm)</label><input type="number" id="pulse" placeholder="72"></div>
+          <div class="vital-box"><label>SpO2 (%)</label><input type="number" id="spo2" placeholder="98"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Weight & output</div>
+        <div class="vital-input-row">
+          <div class="vital-box"><label>Weight (lbs)</label><input type="number" id="weight" placeholder="150"></div>
+          <div class="vital-box"><label>Urine (cc)</label><input type="number" id="urine" placeholder="300"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Bowel movement (Bristol scale 1–7)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">1 = hard lumps · 4 = normal · 7 = liquid</div>
+        <div class="bristol-grid">
+          <div class="bristol-btn" onclick="selectBristol(1,this)">1</div>
+          <div class="bristol-btn" onclick="selectBristol(2,this)">2</div>
+          <div class="bristol-btn" onclick="selectBristol(3,this)">3</div>
+          <div class="bristol-btn" onclick="selectBristol(4,this)">4</div>
+          <div class="bristol-btn" onclick="selectBristol(5,this)">5</div>
+          <div class="bristol-btn" onclick="selectBristol(6,this)">6</div>
+          <div class="bristol-btn" onclick="selectBristol(7,this)">7</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Notes</div>
+        <input type="text" id="vital-notes" placeholder="Any additional notes...">
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <label style="font-size:13px;color:var(--color-text-secondary);min-width:90px">Time</label>
+          <input type="datetime-local" id="vital-time" style="flex:1">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveVitals()">Save vitals</button>
+      <div style="margin-top:16px" id="vitals-log-area"></div>
+    </div>
+
+    <div class="section" id="sec-symptoms">
+      <p class="section-header">Log symptoms</p>
+      <div class="card">
+        <div class="card-title">Common symptoms</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Headache')">Headache</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Nausea')">Nausea</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Fatigue')">Fatigue</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Dizziness')">Dizziness</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Shortness of breath')">Shortness of breath</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Swelling')">Swelling</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Fever')">Fever</button>
+          <button class="symptom-btn" onclick="toggleSymptom(this,'Chest tightness')">Chest tightness</button>
+        </div>
+        <div id="custom-symptoms-area"></div>
+        <button class="btn btn-sm" style="margin-top:8px" onclick="openAddSymptomModal()">+ Custom symptom</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Pain</div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:13px;color:var(--color-text-secondary)">Location</label>
+          <input type="text" id="pain-location" placeholder="e.g. lower back, left knee..." style="margin-top:4px">
+        </div>
+        <label style="font-size:13px;color:var(--color-text-secondary)">Scale: <span id="pain-val">0</span>/10</label>
+        <input type="range" min="0" max="10" value="0" step="1" style="width:100%;margin:8px 0" id="pain-scale" oninput="document.getElementById('pain-val').textContent=this.value">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-tertiary)"><span>None</span><span>Moderate</span><span>Worst</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Notes & time</div>
+        <textarea id="symptom-notes" placeholder="Additional details..."></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <label style="font-size:13px;color:var(--color-text-secondary);min-width:90px">Time</label>
+          <input type="datetime-local" id="symptom-time" style="flex:1">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveSymptoms()">Save symptoms</button>
+      <div style="margin-top:16px" id="symptoms-log-area"></div>
+    </div>
+
+    <div class="section" id="sec-notes">
+      <p class="section-header">Doctor notes</p>
+      <div class="card">
+        <div class="card-title">New question for doctor</div>
+        <textarea id="dr-question" placeholder="What do I want to ask at my next appointment?"></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <label style="font-size:13px;color:var(--color-text-secondary);min-width:90px">Category</label>
+          <select id="dr-category" style="flex:1">
+            <option>General</option><option>Medication</option><option>Symptoms</option><option>Test results</option><option>Lifestyle</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveDrNote()">Add question</button>
+      </div>
+      <div id="dr-notes-area"></div>
+    </div>
+
+    <div class="section" id="sec-export">
+      <p class="section-header">Export data</p>
+      <div class="card">
+        <div class="card-title">Select data to export</div>
+        <div class="export-check"><input type="checkbox" id="exp-meds" checked><label for="exp-meds">Medication log</label></div>
+        <div class="export-check"><input type="checkbox" id="exp-vitals" checked><label for="exp-vitals">Vitals log</label></div>
+        <div class="export-check"><input type="checkbox" id="exp-symptoms" checked><label for="exp-symptoms">Symptoms log</label></div>
+        <div class="export-check"><input type="checkbox" id="exp-notes" checked><label for="exp-notes">Doctor notes</label></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Date range</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><label style="font-size:13px;color:var(--color-text-secondary);min-width:90px">From</label><input type="date" id="exp-from" style="flex:1"></div>
+        <div style="display:flex;align-items:center;gap:8px"><label style="font-size:13px;color:var(--color-text-secondary);min-width:90px">To</label><input type="date" id="exp-to" style="flex:1"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="exportCSV()">Download CSV</button>
+      <button class="btn" style="width:100%" onclick="copyForEmail()">Copy for email</button>
+      <div id="export-preview" style="margin-top:12px"></div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">Integrations (coming soon)</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.8">Apple Health · Google Fit · Dexcom Clarity<br>Withings Scale & BP · Omron BP · Renpho</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="navTo('meds',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="6" height="10" rx="2"/><rect x="9" y="7" width="6" height="14" rx="2"/><rect x="15" y="13" width="6" height="8" rx="2"/></svg>
+      Meds
+    </button>
+    <button class="nav-btn" onclick="navTo('vitals',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,12 6,12 8,4 10,20 12,12 14,16 16,12 22,12"/></svg>
+      Vitals
+    </button>
+    <button class="nav-btn" onclick="navTo('symptoms',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Symptoms
+    </button>
+    <button class="nav-btn" onclick="navTo('notes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+      Dr Notes
+    </button>
+    <button class="nav-btn" onclick="navTo('export',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+  </nav>
+</div>
+
+<!-- ADD MED MODAL -->
+<div class="modal-overlay" id="modal-add-med" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Add medication <button class="close-btn" onclick="closeModal('modal-add-med')">×</button></div>
+    <div style="margin-bottom:10px"><label style="font-size:13px;color:var(--color-text-secondary)">Name</label><input type="text" id="new-med-name" placeholder="e.g. Lisinopril" style="margin-top:4px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div><label style="font-size:13px;color:var(--color-text-secondary)">Dosage</label><input type="text" id="new-med-dose" placeholder="10mg" style="margin-top:4px"></div>
+      <div><label style="font-size:13px;color:var(--color-text-secondary)">Frequency</label><input type="text" id="new-med-freq" placeholder="BID / Q12 / QD" style="margin-top:4px"></div>
+    </div>
+    <div style="margin-bottom:10px"><label style="font-size:13px;color:var(--color-text-secondary)">Admin times (comma separated)</label><input type="text" id="new-med-times" placeholder="AM, PM, BED" style="margin-top:4px"></div>
+    <div style="margin-bottom:10px"><label style="font-size:13px;color:var(--color-text-secondary)">Min hours between doses</label><input type="number" id="new-med-interval" placeholder="e.g. 12" style="margin-top:4px"></div>
+    <div style="margin-bottom:10px"><label style="font-size:13px;color:var(--color-text-secondary)">Pill color (fallback if no photo)</label>
+      <select id="new-med-color" style="margin-top:4px;width:100%">
+        <option value="#178BCA">Blue</option><option value="#D85A30">Orange</option><option value="#1D9E75">Green</option>
+        <option value="#D4537E">Pink</option><option value="#7F77DD">Purple</option><option value="#BA7517">Amber</option><option value="#888780">White/Gray</option>
+      </select>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:13px;color:var(--color-text-secondary)">Pill photo (optional)</label>
+      <div class="photo-upload-area" onclick="triggerPhotoInput()">
+        <input type="file" id="new-med-photo-input" accept="image/*" onchange="handlePhotoSelect(event)">
+        <div id="photo-upload-prompt">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" style="margin:0 auto 6px;display:block"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div style="font-size:13px;color:var(--color-text-secondary)">Tap to take photo or upload</div>
+          <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px">JPG, PNG, HEIC supported</div>
+        </div>
+        <div id="photo-preview-container" style="display:none">
+          <div class="photo-preview-wrap">
+            <img id="photo-preview-img" class="photo-preview" src="" alt="Pill preview">
+            <button class="photo-remove-btn" onclick="removePhoto(event)">×</button>
+          </div>
+          <div style="font-size:12px;color:var(--color-text-success);margin-top:6px">Photo ready</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveMed()">Add medication</button>
+  </div>
+</div>
+
+<!-- EDIT PHOTO MODAL -->
+<div class="modal-overlay" id="modal-edit-photo" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="edit-photo-title">Update pill photo <button class="close-btn" onclick="closeModal('modal-edit-photo')">×</button></div>
+    <div id="edit-photo-current" style="margin-bottom:12px"></div>
+    <div class="photo-upload-area" onclick="triggerEditPhotoInput()">
+      <input type="file" id="edit-med-photo-input" accept="image/*" onchange="handleEditPhotoSelect(event)">
+      <div id="edit-photo-prompt">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" style="margin:0 auto 6px;display:block"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div style="font-size:13px;color:var(--color-text-secondary)">Tap to upload new photo</div>
+      </div>
+      <div id="edit-photo-new-preview" style="display:none">
+        <img id="edit-photo-preview-img" class="photo-preview" src="" alt="New pill photo">
+        <div style="font-size:12px;color:var(--color-text-success);margin-top:6px">New photo ready</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-danger btn-sm" style="flex:1" onclick="removeEditPhoto()">Remove photo</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveEditPhoto()">Save photo</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG MEDS MODAL -->
+<div class="modal-overlay" id="modal-log-med" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="log-med-title">Log medications <button class="close-btn" onclick="closeModal('modal-log-med')">×</button></div>
+    <div style="margin-bottom:10px"><label style="font-size:13px;color:var(--color-text-secondary)">Time taken</label><input type="datetime-local" id="log-med-time" style="margin-top:4px"></div>
+    <div id="log-med-pills" style="margin-bottom:10px"></div>
+    <button class="btn btn-sm" onclick="selectAllPills()" style="margin-bottom:10px">Select all</button>
+    <button class="btn btn-primary" style="width:100%" onclick="confirmMedLog()">Confirm</button>
+  </div>
+</div>
+
+<!-- ADD SYMPTOM MODAL -->
+<div class="modal-overlay" id="modal-add-symptom" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Custom symptom <button class="close-btn" onclick="closeModal('modal-add-symptom')">×</button></div>
+    <div style="margin-bottom:8px"><label style="font-size:13px;color:var(--color-text-secondary)">Symptom name</label><input type="text" id="new-symptom-name" placeholder="e.g. Joint stiffness" style="margin-top:4px"></div>
+    <div style="margin-bottom:8px"><label style="font-size:13px;color:var(--color-text-secondary)">Scale type</label>
+      <select id="new-symptom-scale" style="margin-top:4px;width:100%">
+        <option value="none">None (present/absent)</option><option value="0-10">0–10 scale</option><option value="text">Text entry</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveCustomSymptom()">Add</button>
+  </div>
+</div>
+
+<!-- DR RESPONSE MODAL -->
+<div class="modal-overlay" id="modal-dr-response" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Doctor's response <button class="close-btn" onclick="closeModal('modal-dr-response')">×</button></div>
+    <div id="dr-response-q" style="margin-bottom:10px;font-size:14px"></div>
+    <textarea id="dr-response-text" placeholder="Type or paste doctor's response..."></textarea>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveDrResponse()">Save response</button>
+  </div>
+</div>
+
+<script>
+let state={role:'Patient',meds:[],medLogs:[],vitals:[],symptoms:[],drNotes:[],customSymptoms:[],activeSymptomsSelected:[],bristolSelected:null,currentDrNoteIdx:null};
+let pendingPhotoData=null,editPhotoIdx=null,pendingEditPhotoData=null;
+
+function loadState(){try{const s=localStorage.getItem('cga_v2');if(s)state={...state,...JSON.parse(s)};}catch(e){}}
+function saveState(){try{localStorage.setItem('cga_v2',JSON.stringify(state));}catch(e){alert('Storage full — photos may be too large.');}}
+loadState();
+
+function toggleRole(){ // onclick
+	state.role=state.role==='Patient'?'Caregiver':'Patient';
+	document.getElementById('role-btn').textContent=state.role;
+	saveState();
+}
+function navTo(sec,btn){// onclick
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');btn.classList.add('active');
+  if(sec==='meds')renderTimeSlots();
+  if(sec==='vitals')renderVitalsLog();
+  if(sec==='symptoms')renderSymptomsLog();
+  if(sec==='notes')renderDrNotes();
+  if(sec==='export')setExportDefaults();
+}
+function closeModal(id){document.getElementById(id).style.display='none';}// onclick
+function triggerPhotoInput(){document.getElementById('new-med-photo-input').click();}// onclick
+function triggerEditPhotoInput(){document.getElementById('edit-med-photo-input').click();}// onclick
+
+function handlePhotoSelect(e){// onchange
+  const file=e.target.files[0];if(!file)return;
+  resizeImage(file,400,400,function(d){
+    pendingPhotoData=d;
+    document.getElementById('photo-upload-prompt').style.display='none';
+    document.getElementById('photo-preview-container').style.display='block';
+    document.getElementById('photo-preview-img').src=d;
+  });
+}
+function handleEditPhotoSelect(e){// onchange
+  const file=e.target.files[0];
+  if(!file)return;
+  resizeImage(file,400,400,function(d){
+    pendingEditPhotoData=d;
+    document.getElementById('edit-photo-prompt').style.display='none';
+    document.getElementById('edit-photo-new-preview').style.display='block';
+    document.getElementById('edit-photo-preview-img').src=d;
+  });
+}
+function resizeImage(file,maxW,maxH,cb){// internal
+  const r=new FileReader();
+  r.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const c=document.createElement('canvas');
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+      c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      cb(c.toDataURL('image/jpeg',0.75));
+    };img.src=e.target.result;
+  };r.readAsDataURL(file);
+}
+function removePhoto(e){// onclick
+	e.stopPropagation();
+	pendingPhotoData=null;
+	document.getElementById('photo-upload-prompt').style.display='block';
+	document.getElementById('photo-preview-container').style.display='none';
+	document.getElementById('new-med-photo-input').value='';
+}
+function removeEditPhoto(){// onclick
+	if(editPhotoIdx===null)return;
+	state.meds[editPhotoIdx].photo=null;
+	pendingEditPhotoData=null;
+	saveState();
+	closeModal('modal-edit-photo');
+	renderMedList();
+}
+function saveEditPhoto(){// onclick
+	if(editPhotoIdx===null)return;
+	if(pendingEditPhotoData)state.meds[editPhotoIdx].photo=pendingEditPhotoData;
+	saveState();
+	closeModal('modal-edit-photo');
+	renderMedList();
+	pendingEditPhotoData=null;
+}
+function openEditPhotoModal(i){// onclick
+  editPhotoIdx=i;pendingEditPhotoData=null;
+  const med=state.meds[i];
+  document.getElementById('edit-photo-title').textContent='Pill photo — ${med.name}';
+  const cur=document.getElementById('edit-photo-current');
+  
+  if(med.photo === null){
+	  cur.innerHTML='<div style="text-align:center"><img src="${med.photo}" style="max-height:100px;border-radius:8px;border:0.5px solid var(--color-border-tertiary)"><div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">Current photo</div></div>`:`<div style="font-size:13px;color:var(--color-text-secondary);text-align:center;padding:8px">No photo yet</div>';
+  }
+  document.getElementById('edit-photo-prompt').style.display='block';
+  document.getElementById('edit-photo-new-preview').style.display='none';
+  document.getElementById('edit-med-photo-input').value='';
+  document.getElementById('modal-edit-photo').style.display='flex';
+}
+function pillAvatar(med,size){// internal
+	size=size||36;
+	if(med.photo){
+		return`<img src="${med.photo}" style="width:${size}px;height:${size}px;border-radius:${size<=36?'50%':'8px'};object-fit:cover;border:1px solid var(--color-border-secondary);flex-shrink:0">`;
+	}else {
+		return `<div style="width:${size}px;height:${size}px;border-radius:${size<=36?'50%':'8px'};background:${med.color||'#178BCA'}22;border:1px solid ${med.color||'#178BCA'}44;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:${Math.round(size*0.35)}px;font-weight:500;color:${med.color||'#178BCA'}">${(med.name||'?').substring(0,2).toUpperCase()}</div>`;
+	}
+}
+
+let medViewMode='log';
+function setMedView(mode,btn){// onclick
+	medViewMode=mode;
+	document.querySelectorAll('.switch-btn').forEach(b=>b.classList.remove('active'));
+	btn.classList.add('active');
+	document.getElementById('med-view-log').style.display=mode==='log'?'block':'none';
+	document.getElementById('med-view-manage').style.display=mode==='manage'?'block':'none';
+	document.getElementById('med-view-history').style.display=mode==='history'?'block':'none';
+	if(mode==='log')renderTimeSlots();
+	if(mode==='manage')renderMedList();
+	if(mode==='history'){
+		const area=document.getElementById('med-history-area');
+		const logs=[...state.medLogs].sort((a,b)=>new Date(b.time)-new Date(a.time));
+		if(logs.length===0){
+			area.innerHTML='<div class="empty-state">No medication logs yet</div>';
+			return;
+		}
+		area.innerHTML=logs.slice(0,50).map(l=>{const med=state.meds.find(m=>m.name===l.medName);
+		return`<div class="log-entry med-log" style="display:flex;align-items:center;gap:8px;padding-left:8px">${med?pillAvatar(med,28):''}<div style="flex:1"><div class="ts">${fmtDT(l.time)} · ${l.slot} · ${l.role||''}</div><div>${l.medName} ${l.dose} — <strong>${l.taken?'Taken':'Skipped'}</strong></div></div></div>`;}).join('');
+	}
+}
+function renderTimeSlots(){//internal
+	const s=new Set();
+	state.meds.forEach(m=>{if(m.times)m.times.forEach(t=>s.add(t.trim()));});
+	const area=document.getElementById('time-slots-area'),remArea=document.getElementById('reminders-area'),slots=[...s],now=new Date();
+	let remHtml='';
+	state.meds.forEach(m=>{
+		if(!m.interval)return;
+		const logs=state.medLogs.filter(l=>l.medName===m.name).sort((a,b)=>new Date(b.time)-new Date(a.time));
+		if(logs.length>0){
+			const last=new Date(logs[0].time),hrs=(now-last)/3600000,next=new Date(last.getTime()+m.interval*3600000);
+			if(hrs<m.interval)remHtml+=`<div class="reminder-banner">⏰ ${m.name}: next dose at ${fmtTime(next)}</div>`;
+		}
+	});
+	remArea.innerHTML=remHtml;
+	if(slots.length===0){
+		area.innerHTML='<div class="empty-state">No medications added yet.<br>Go to Manage to add your medications.</div>';
+		return;
+	}
+	area.innerHTML=slots.map(slot=>{
+		const meds=state.meds.filter(m=>m.times&&m.times.map(t=>t.trim()).includes(slot));
+		return`<div class="time-slot"><div class="time-slot-header"><span class="time-slot-name">${slot}</span><button class="btn btn-sm btn-primary" onclick="openLogModal('${slot}')">Log ${slot}</button></div><div style="display:flex;flex-wrap:wrap;gap:6px">${meds.map(m=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:var(--color-background-primary);border-radius:20px;border:0.5px solid var(--color-border-tertiary);font-size:13px">${pillAvatar(m,24)}<span>${m.name}</span><span style="color:var(--color-text-secondary);font-size:12px">${m.dose}</span></div>`).join('')}</div></div>`;
+	}).join('');
+}
+function openLogModal(slot){// onclick
+  const meds=state.meds.filter(m=>m.times&&m.times.map(t=>t.trim()).includes(slot));
+  document.getElementById('log-med-title').textContent=`Log ${slot} medications`;
+  const now=new Date();
+  now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('log-med-time').value=now.toISOString().slice(0,16);
+  const pillsArea=document.getElementById('log-med-pills');
+  pillsArea.dataset.slot=slot;
+  pillsArea.innerHTML=meds.map((m,i)=>{
+    const logs=state.medLogs.filter(l=>l.medName===m.name).sort((a,b)=>new Date(b.time)-new Date(a.time));
+    const lastLog=logs[0],tooSoon=m.interval&&lastLog&&(new Date()-new Date(lastLog.time))/3600000<m.interval;
+    const nextTime=tooSoon?new Date(new Date(lastLog.time).getTime()+m.interval*3600000):null;
+    return`<div class="log-pill-row"><input type="checkbox" id="log-pill-${i}" ${tooSoon?'disabled':''} style="width:auto;cursor:pointer;flex-shrink:0">${pillAvatar(m,36)}<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">${m.name}</div><div style="font-size:12px;color:var(--color-text-secondary)">${m.dose}${m.freq?' · '+m.freq:''}</div></div>${tooSoon?`<span style="font-size:11px;color:var(--color-text-warning);text-align:right;flex-shrink:0">Next:<br>${fmtTime(nextTime)}</span>`:''}</div>`;
+  }).join('');
+  document.getElementById('modal-log-med').style.display='flex';
+}
+function selectAllPills(){document.querySelectorAll('#log-med-pills input[type=checkbox]:not([disabled])').forEach(c=>c.checked=true);}// onclick
+function confirmMedLog(){// onclick
+  const slot=document.getElementById('log-med-pills').dataset.slot,time=document.getElementById('log-med-time').value;
+  const meds=state.meds.filter(m=>m.times&&m.times.map(t=>t.trim()).includes(slot));
+  const checkboxes=document.querySelectorAll('#log-med-pills input[type=checkbox]');
+  meds.forEach((m,i)=>{if(checkboxes[i]&&!checkboxes[i].disabled)state.medLogs.push({medName:m.name,dose:m.dose,slot,time:time||new Date().toISOString(),taken:checkboxes[i].checked,role:state.role});});
+  saveState();
+  closeModal('modal-log-med');
+  renderTimeSlots();
+}
+function openAddMedModal(){// onclick
+  ['new-med-name','new-med-dose','new-med-freq','new-med-times','new-med-interval'].forEach(id=>document.getElementById(id).value='');
+  pendingPhotoData=null;
+  document.getElementById('photo-upload-prompt').style.display='block';
+  document.getElementById('photo-preview-container').style.display='none';
+  document.getElementById('new-med-photo-input').value='';
+  document.getElementById('modal-add-med').style.display='flex';
+}
+function saveMed(){// onclick
+  const name=document.getElementById('new-med-name').value.trim();if(!name)return alert('Please enter a medication name');
+  const times=document.getElementById('new-med-times').value.split(',').map(t=>t.trim()).filter(Boolean);
+  state.meds.push({name,dose:document.getElementById('new-med-dose').value.trim(),freq:document.getElementById('new-med-freq').value.trim(),times,interval:parseFloat(document.getElementById('new-med-interval').value)||0,color:document.getElementById('new-med-color').value,photo:pendingPhotoData||null});
+  pendingPhotoData=null;
+  saveState();
+  closeModal('modal-add-med');
+  renderMedList();
+}
+function renderMedList(){//internal
+	const area=document.getElementById('med-list-area');
+	if(state.meds.length===0){
+		area.innerHTML='<div class="empty-state">No medications yet</div>';
+		return;
+	}
+	area.innerHTML=state.meds.map((m,i)=>`<div class="card" style="display:flex;align-items:center;gap:10px">${pillAvatar(m,44)}<div style="flex:1;min-width:0"><div style="font-weight:500">${m.name} <span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">${m.dose}</span></div><div style="font-size:12px;color:var(--color-text-secondary)">${m.freq||''} · ${(m.times||[]).join(', ')}</div><button class="btn btn-sm" style="margin-top:5px;font-size:11px" onclick="openEditPhotoModal(${i})">${m.photo?'Change photo':'Add photo'}</button></div><button class="btn btn-sm btn-danger" onclick="deleteMed(${i})">Remove</button></div>`).join('');
+}
+function deleteMed(i){// onclick
+	if(confirm('Remove this medication?')){
+		state.meds.splice(i,1);
+		saveState();
+		renderMedList();
+	}
+}
+
+let bristolVal=null;
+function selectBristol(val,btn){// onclick
+	bristolVal=val;
+	document.querySelectorAll('.bristol-btn').forEach(b=>b.classList.remove('selected'));
+	btn.classList.add('selected');
+}
+function saveVitals(){// onclick
+  const entry={time:document.getElementById('vital-time').value||new Date().toISOString(),bp_sys:document.getElementById('bp-sys').value,bp_dia:document.getElementById('bp-dia').value,pulse:document.getElementById('pulse').value,spo2:document.getElementById('spo2').value,weight:document.getElementById('weight').value,urine:document.getElementById('urine').value,bristol:bristolVal,notes:document.getElementById('vital-notes').value,role:state.role};
+  if(!Object.entries(entry).some(([k,v])=>k!=='time'&&k!=='role'&&v!==null&&v!==''))return alert('Please enter at least one vital.');
+  state.vitals.push(entry);
+  saveState();
+  ['bp-sys','bp-dia','pulse','spo2','weight','urine','vital-notes'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.bristol-btn').forEach(b=>b.classList.remove('selected'));
+  bristolVal=null;
+  renderVitalsLog();
+}
+function renderVitalsLog(){// internal
+  const area=document.getElementById('vitals-log-area'),logs=[...state.vitals].sort((a,b)=>new Date(b.time)-new Date(a.time));
+  if(logs.length===0){area.innerHTML='';return;}
+  area.innerHTML='<div class="card-title" style="margin-bottom:8px">Recent vitals</div>'+logs.slice(0,10).map(l=>{
+    const p=[];
+    if(l.bp_sys&&l.bp_dia)p.push(`BP: ${l.bp_sys}/${l.bp_dia}`);
+	if(l.pulse)p.push(`Pulse: ${l.pulse}`);
+	if(l.spo2)p.push(`SpO2: ${l.spo2}%`);
+	if(l.weight)p.push(`Wt: ${l.weight} lbs`);
+	if(l.urine)p.push(`Urine: ${l.urine} cc`);
+	if(l.bristol)p.push(`Bristol: ${l.bristol}`);
+    return`<div class="log-entry vital-log"><div class="ts">${fmtDT(l.time)} · ${l.role||''}</div><div>${p.join(' · ')}</div>${l.notes?`<div style="color:var(--color-text-secondary);font-size:12px">${l.notes}</div>`:''}</div>`;
+  }).join('');
+}
+function toggleSymptom(btn,name){// onclick
+	btn.classList.toggle('active');
+	const idx=state.activeSymptomsSelected.indexOf(name);
+	if(idx===-1)state.activeSymptomsSelected.push(name);
+	else state.activeSymptomsSelected.splice(idx,1);
+}
+function openAddSymptomModal(){// onclick
+	document.getElementById('new-symptom-name').value='';
+	document.getElementById('modal-add-symptom').style.display='flex';
+}
+function saveCustomSymptom(){// onclick
+	const name=document.getElementById('new-symptom-name').value.trim();
+	if(!name)return;
+	state.customSymptoms.push({name,scale:document.getElementById('new-symptom-scale').value});
+	saveState();
+	closeModal('modal-add-symptom');
+	renderCustomSymptomBtns();
+}
+function renderCustomSymptomBtns(){//internal
+	const area=document.getElementById('custom-symptoms-area');
+	area.innerHTML=state.customSymptoms.map((s,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-top:6px"><button class="symptom-btn" id="cs-btn-${i}" onclick="toggleCustomSymptom(${i},this)">${s.name}</button>${s.scale==='0-10'?`<input type="range" min="0" max="10" value="0" step="1" id="cs-scale-${i}" style="flex:1;max-width:100px"><span id="cs-val-${i}">0</span>`:''}${s.scale==='text'?`<input type="text" id="cs-text-${i}" placeholder="value..." style="flex:1;max-width:140px">`:''}]</div>`).join('');
+	area.querySelectorAll('input[type=range]').forEach(r=>{
+		r.oninput=function(){
+			document.getElementById(this.id.replace('scale','val')).textContent=this.value;
+		};
+	});
+}
+function toggleCustomSymptom(i,btn){btn.classList.toggle('active');}// onclick
+function saveSymptoms(){// onclick
+	const selected=[...state.activeSymptomsSelected],pain=parseInt(document.getElementById('pain-scale').value),painLoc=document.getElementById('pain-location').value.trim();
+	const customSelected=state.customSymptoms.map((s,i)=>{
+		const btn=document.getElementById(`cs-btn-${i}`);
+		if(!btn||!btn.classList.contains('active'))return null;
+		let val='';
+		if(s.scale==='0-10')val=document.getElementById(`cs-scale-${i}`)?.value||'';
+		if(s.scale==='text')val=document.getElementById(`cs-text-${i}`)?.value||'';
+		return{name:s.name,val};
+	}).filter(Boolean);
+	if(selected.length===0&&pain===0&&customSelected.length===0)return alert('Please select at least one symptom.');
+	state.symptoms.push({time:document.getElementById('symptom-time').value||new Date().toISOString(),symptoms:selected,pain,painLocation:painLoc,customSymptoms:customSelected,notes:document.getElementById('symptom-notes').value,role:state.role});
+	saveState();
+	document.querySelectorAll('.symptom-btn').forEach(b=>b.classList.remove('active'));
+	state.activeSymptomsSelected=[];
+	document.getElementById('pain-scale').value=0;
+	document.getElementById('pain-val').textContent='0';
+	document.getElementById('pain-location').value='';
+	document.getElementById('symptom-notes').value='';
+	renderSymptomsLog();
+}
+function renderSymptomsLog(){//internal
+  renderCustomSymptomBtns();
+  const area=document.getElementById('symptoms-log-area'),logs=[...state.symptoms].sort((a,b)=>new Date(b.time)-new Date(a.time));
+  if(logs.length===0){area.innerHTML='';return;}
+  area.innerHTML='<div class="card-title" style="margin-bottom:8px">Recent symptoms</div>'+logs.slice(0,10).map(l=>{let s=l.symptoms.join(', ');if(l.pain>0)s+=` · Pain ${l.pain}/10${l.painLocation?' ('+l.painLocation+')':''}`;if(l.customSymptoms)l.customSymptoms.forEach(c=>{s+=` · ${c.name}${c.val?' '+c.val:''}`;});return`<div class="log-entry symptom-log"><div class="ts">${fmtDT(l.time)} · ${l.role||''}</div><div>${s||'(logged)'}</div>${l.notes?`<div style="color:var(--color-text-secondary);font-size:12px">${l.notes}</div>`:''}</div>`;}).join('');
+}
+function saveDrNote(){// onclick
+	const q=document.getElementById('dr-question').value.trim();
+	if(!q)return alert('Please enter a question');
+	state.drNotes.push({question:q,category:document.getElementById('dr-category').value,time:new Date().toISOString(),response:'',role:state.role});
+	document.getElementById('dr-question').value='';
+	saveState();
+	renderDrNotes();
+}
+function renderDrNotes(){//internal
+	const area=document.getElementById('dr-notes-area');
+	if(state.drNotes.length===0){
+		area.innerHTML='<div class="empty-state">No questions added yet</div>';
+		return;
+	}
+	area.innerHTML=[...state.drNotes].reverse().map((n,ri)=>{
+		const i=state.drNotes.length-1-ri;
+		return`<div class="dr-note-entry"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="flex:1"><span class="tag">${n.category}</span><div style="font-weight:500;margin-top:4px">${n.question}</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${fmtDT(n.time)} · ${n.role||''}</div>${n.response?`<div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;font-style:italic">Dr: ${n.response}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="btn btn-sm" onclick="openDrResponse(${i})">+ Response</button><button class="btn btn-sm btn-danger" onclick="deleteDrNote(${i})">Del</button></div></div></div>`;
+	}).join('');
+}
+function openDrResponse(i){// onclick
+	state.currentDrNoteIdx=i;
+	document.getElementById('dr-response-q').textContent=state.drNotes[i].question;
+	document.getElementById('dr-response-text').value=state.drNotes[i].response||'';
+	document.getElementById('modal-dr-response').style.display='flex';
+}
+function saveDrResponse(){// onclick
+	if(state.currentDrNoteIdx===null)return;
+	state.drNotes[state.currentDrNoteIdx].response=document.getElementById('dr-response-text').value;
+	saveState();
+	closeModal('modal-dr-response');
+	renderDrNotes();
+}
+function deleteDrNote(i){// onclick
+	if(confirm('Delete this note?')){
+		state.drNotes.splice(i,1);
+		saveState();
+		renderDrNotes();
+	}
+}
+
+function setExportDefaults(){// internal
+  const now=new Date();
+  document.getElementById('exp-to').value=now.toISOString().slice(0,10);
+  document.getElementById('exp-from').value=new Date(now-7*86400000).toISOString().slice(0,10);
+}
+
+function exportCSV(){// onclick
+	const from=new Date(document.getElementById('exp-from').value||'2000-01-01');
+	const to=new Date((document.getElementById('exp-to').value||new Date().toISOString().slice(0,10))+'T23:59:59');
+	let csv='';
+	if(document.getElementById('exp-meds').checked){
+		csv+='MEDICATION LOG\nDate,Time,Medication,Dose,Slot,Taken,Logged By\n';
+		state.medLogs.filter(l=>inRange(l.time,from,to)).forEach(l=>{
+			csv+=`${fmtExportDate(l.time)},${fmtExportTime(l.time)},${l.medName},${l.dose},${l.slot},${l.taken?'Yes':'No'},${l.role||''}\n`;
+		});
+		csv+='\n';
+	}
+	if(document.getElementById('exp-vitals').checked){
+		csv+='VITALS LOG\nDate,Time,BP Sys,BP Dia,Pulse,SpO2,Weight(lbs),Urine(cc),Bristol,Notes,Logged By\n';
+		state.vitals.filter(v=>inRange(v.time,from,to)).forEach(v=>{
+			csv+=`${fmtExportDate(v.time)},${fmtExportTime(v.time)},${v.bp_sys||''},${v.bp_dia||''},${v.pulse||''},${v.spo2||''},${v.weight||''},${v.urine||''},${v.bristol||''},"${v.notes||''}",${v.role||''}\n`;
+		});
+		csv+='\n';
+	}
+	if(document.getElementById('exp-symptoms').checked){
+		csv+='SYMPTOMS LOG\nDate,Time,Symptoms,Pain(0-10),Pain Location,Custom,Notes,Logged By\n';
+		state.symptoms.filter(s=>inRange(s.time,from,to)).forEach(s=>{
+			const custom=(s.customSymptoms||[]).map(c=>`${c.name}${c.val?' '+c.val:''}`).join('; ');
+			csv+=`${fmtExportDate(s.time)},${fmtExportTime(s.time)},"${(s.symptoms||[]).join('; ')}",${s.pain||0},"${s.painLocation||''}","${custom}","${s.notes||''}",${s.role||''}\n`;
+		});
+		csv+='\n';
+	}
+	if(document.getElementById('exp-notes').checked){
+		csv+='DOCTOR NOTES\nDate,Category,Question,Response,Logged By\n';
+		state.drNotes.filter(n=>inRange(n.time,from,to)).forEach(n=>{
+			csv+=`${fmtExportDate(n.time)},${n.category},"${n.question}","${n.response||''}",${n.role||''}\n`;
+		});
+	}
+	if(!csv.trim())return alert('No data in selected range.');
+	const blob=new Blob([csv],{type:'text/csv'});
+	const url=URL.createObjectURL(blob);
+	const a=document.createElement('a');
+	a.href=url;
+	a.download='caregiver_data.csv';
+	a.click();
+	URL.revokeObjectURL(url);
+}
+
+function copyForEmail(){// onclick
+	const from=new Date(document.getElementById('exp-from').value||'2000-01-01');
+	const to=new Date((document.getElementById('exp-to').value||new Date().toISOString().slice(0,10))+'T23:59:59');
+	let text=`Health Report: ${fmtExportDate(from)} – ${fmtExportDate(to)}\n\n`;
+	if(document.getElementById('exp-meds').checked&&state.medLogs.length){
+		text+='MEDICATIONS\n';
+		state.medLogs.filter(l=>inRange(l.time,from,to)).forEach(l=>{text+=`  ${fmtExportDate(l.time)} ${fmtExportTime(l.time)} – ${l.medName} ${l.dose} (${l.slot}): ${l.taken?'Taken':'Skipped'}\n`;});
+		text+='\n';
+	}
+	if(document.getElementById('exp-vitals').checked&&state.vitals.length){
+		text+='VITALS\n';
+		state.vitals.filter(v=>inRange(v.time,from,to)).forEach(v=>{
+			const p=[];if(v.bp_sys)p.push(`BP ${v.bp_sys}/${v.bp_dia}`);if(v.pulse)p.push(`P ${v.pulse}`);if(v.spo2)p.push(`SpO2 ${v.spo2}%`);if(v.weight)p.push(`Wt ${v.weight}lbs`);if(v.urine)p.push(`Urine ${v.urine}cc`);
+			text+=`  ${fmtExportDate(v.time)} ${fmtExportTime(v.time)} – ${p.join(', ')}\n`;
+		});
+		text+='\n';
+	}
+	navigator.clipboard.writeText(text).then(()=>{
+		document.getElementById('export-preview').innerHTML='<div style="padding:8px;color:var(--color-text-success);font-size:13px">Copied to clipboard</div>';
+		setTimeout(()=>document.getElementById('export-preview').innerHTML='',2000);
+	});
+}
+
+function inRange(t,from,to){//internal
+	const d=new Date(t);
+	return d>=from&&d<=to;
+}
+
+function fmtExportDate(t){//internal
+  const d=new Date(t);
+  return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+}
+function fmtExportTime(t){//internal
+  const d=new Date(t);
+  return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+function fmtDT(t){//internal
+	if(!t)return'';
+	return new Date(t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+}
+function fmtTime(d){return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}//internal
+
+function init(){
+  const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('vital-time').value=now.toISOString().slice(0,16);
+  document.getElementById('symptom-time').value=now.toISOString().slice(0,16);
+  document.getElementById('role-btn').textContent=state.role;
+  renderTimeSlots();
+  renderCustomSymptomBtns();
+  setExportDefaults();
+}
+init();
+</script>
